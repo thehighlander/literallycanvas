@@ -26,6 +26,9 @@ class LC.ToolWidget extends LC.Widget
     @tool = @makeTool()
 
   select: (lc) ->
+    if @prepareTool
+      @prepareTool(lc)
+
     lc.setTool(@tool)
 
   makeTool: -> undefined
@@ -57,6 +60,25 @@ class LC.RectangleWidget extends LC.StrokeWidget
   button: -> "<img src='#{@opts.imageURLPrefix}/rectangle.png'>"
   makeTool: -> new LC.RectangleTool()
 
+
+class LC.HighlighterWidget extends LC.StrokeWidget
+
+  title: 'Highlighter'
+  cssSuffix: 'highlighter'
+  button: -> "<img src='#{@opts.imageURLPrefix}/highlighter.png'>"
+  makeTool: -> new LC.HighlighterTool()
+  prepareTool: (lc) -> 
+    # tool.strokeWidth = 40;
+    # canvas.setColor("primary", "rgba(255, 255, 0, 0.50)");
+    # $(".tool-options-highlighter input[type=range]").val(40)
+    # $(".brush-width-val").html("(" +tool.strokeWidth + " px)");
+    @tool.strokeWidth = 40
+    lc.ctx.lineCap = "square"
+    #lc.setColor("primary", "rgba(255, 255, 0, 0.50)")
+    #lc.colors.primary = lc.getColor('primary')    
+    this.$el.find("input[type=range]").val(@tool.strokeWidth)
+    this.$el.find(".brush-width-val").html("(" + @tool.strokeWidth + " px)")
+    
 
 class LC.LineWidget extends LC.StrokeWidget
 

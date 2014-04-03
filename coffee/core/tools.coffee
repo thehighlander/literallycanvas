@@ -43,6 +43,21 @@ class LC.LineTool extends LC.StrokeTool
 
   end: (x, y, lc) ->
     lc.saveShape(@currentShape)
+
+
+class LC.HighlighterTool extends LC.StrokeTool
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Highlight(
+      x, y, x, y, @strokeWidth, 'rgba(255, 255, 0, 0.50)')
+
+  continue: (x, y, lc) ->
+    @currentShape.x2 = x
+    @currentShape.y2 = y
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
    
 
 class LC.Pencil extends LC.StrokeTool

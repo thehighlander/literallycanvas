@@ -87,6 +87,25 @@ class LC.Line extends LC.Shape
     shape
 
 
+class LC.Highlight extends LC.Line
+
+  className: 'Highlight'
+
+  draw: (ctx) ->
+    ctx.lineWidth = @strokeWidth
+    ctx.strokeStyle = @color
+    ctx.lineCap = 'square'
+    ctx.beginPath()
+    ctx.moveTo(@x1, @y1)
+    ctx.lineTo(@x2, @y2)
+    ctx.stroke()
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Highlight(
+      data.x1, data.y1, data.x2, data.y2, data.strokeWidth, data.color)
+    shape
+
+
 class LC.LinePathShape extends LC.Shape
 
   className: 'LinePathShape'

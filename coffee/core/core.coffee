@@ -16,7 +16,11 @@ class LC.LiterallyCanvas
     if @watermarkImage and not @watermarkImage.complete
       @watermarkImage.onload = => @repaint(true, false)
 
-    @buffer = document.createElement('canvas')
+    # chris - this line is replaced as a hack to get LC working with FlashCanvas
+    # @buffer = document.createElement('canvas')
+    @buffer = document.getElementById('literally_swap')
+    FlashCanvas.initElement(this.buffer) if FlashCanvas?
+
     @ctx = @canvas.getContext('2d')
     @bufferCtx = @buffer.getContext('2d')
 

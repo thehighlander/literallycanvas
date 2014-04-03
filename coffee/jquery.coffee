@@ -14,7 +14,7 @@ LC.init = (el, opts = {}) ->
   unless 'toolClasses' of opts
     opts.toolClasses = [
         LC.PencilWidget, LC.EraserWidget, LC.LineWidget, LC.RectangleWidget,
-        LC.TextWidget, LC.PanWidget, LC.EyeDropperWidget,
+        LC.TextWidget, LC.PanWidget, LC.EyeDropperWidget, LC.HighlighterWidget,
     ]
 
   $el = $(el)
@@ -25,6 +25,9 @@ LC.init = (el, opts = {}) ->
 
   unless $el.find('canvas').length
     $el.append('<canvas>')
+
+  FlashCanvas.initElement($el.find('canvas').get(0)) if FlashCanvas?
+      
   lc = new LC.LiterallyCanvas($el.find('canvas').get(0), opts)
   tb = new LC.Toolbar(lc, $tbEl, opts)
   tb.selectTool(tb.tools[0])
