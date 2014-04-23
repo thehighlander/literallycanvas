@@ -21,21 +21,23 @@ class LC.ImageShape extends LC.Shape
 
   className: 'ImageShape'
 
-  # TODO: allow resizing/filling
-  constructor: (@x, @y, @image) ->
+  constructor: (@x, @y, @image, @w, @h) ->
   draw: (ctx, retryCallback) ->
-    if @image.width
-      ctx.drawImage(@image, @x, @y)
+    if @image
+      if (@w && @w > 0) && (@h && @h > 0)
+        ctx.drawImage(@image, @x, @y, @w, @h)
+      else
+        ctx.drawImage(@image, @x, @y)
     else
       @image.onload = retryCallback
   jsonContent: ->
-    {@x, @y, imageSrc: @image.src}
+    w = if @w then @w else 0
+    h = if @h then @h else 0
+    {@x, @y, imageSrc: @image.src, w, h}
   @fromJSON: (lc, data) ->
     img = new Image()
     img.src = data.imageSrc
-    i = new LC.ImageShape(data.x, data.y, img)
-    i
-
+    i = new LC.ImageShape(data.x, data.y, img, data.w, data.h)
 
 class LC.Rectangle extends LC.Shape
 

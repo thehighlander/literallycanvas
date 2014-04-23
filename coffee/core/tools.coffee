@@ -30,6 +30,76 @@ class LC.RectangleTool extends LC.StrokeTool
     lc.saveShape(@currentShape)
 
 
+class LC.StampTool extends LC.StrokeTool
+
+  getCurrentStamp: () ->
+    output = null
+
+    switch @currentStamp
+      when "arrowleft"
+        output = @arrowLeftStamp
+      when "arrowright"
+        output = @arrowRightStamp
+      when "checkmark"
+        output = @checkmarkStamp
+      when "star"
+        output = @starStamp
+      else
+        output = null;
+
+    return output
+
+  preloadImages: () ->
+    @arrowLeftStamp = new Image()
+    @arrowLeftStamp.src = "/content/img/literally/stamps/arrowleft.png"
+
+    @arrowRightStamp = new Image()
+    @arrowRightStamp.src = "/content/img/literally/stamps/arrowright.png"
+
+    @starStamp = new Image()
+    @starStamp.src = "/content/img/literally/stamps/star.png"
+
+    @checkmarkStamp = new Image()
+    @checkmarkStamp.src = "/content/img/literally/stamps/checkmark.png"
+
+  constructor: () -> 
+    @strokeWidth = 0
+    @currentStamp = null;
+    @preloadImages()
+
+  begin: (x, y, lc) ->
+    strokeColor = "rgba(255, 255, 255, 0.0)" # lc.getColor('primary')
+    fillColor = "rgba(1, 1, 1, 0.25)" # lc.getColor('secondary')
+
+    # use a rectangle to indicate the final size of the stamp (until i figure out how to resize stamp on the fly).
+    # also, give 'em the transparent rectangle as guide if no tool was selected.
+    @currentShape = new LC.Rectangle(x, y, @strokeWidth, strokeColor, fillColor)
+
+  continue: (x, y, lc) ->
+    @currentShape.width = x - @currentShape.x
+    @currentShape.height = y - @currentShape.y
+    
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    #todo: use stroke & fill from primary/secondary to draw shape.
+    @img = @getCurrentStamp()
+
+    # #do some swaperooni on the x/y values. if you draw anything but top left to bottom right 
+    # of the rectangle, the ImageShape fails to draw correctly due to negative widths.
+    if @currentShape.width < 0
+      @currentShape.x = @currentShape.x + @currentShape.width
+      @currentShape.width = Math.abs(@currentShape.width)
+
+    if @currentShape.height < 0
+      @currentShape.y = @currentShape.y + @currentShape.height
+      @currentShape.height = Math.abs(@currentShape.height)
+
+    @currentShape = new LC.ImageShape(@currentShape.x, @currentShape.y, @img, @currentShape.width, @currentShape.height)
+
+    lc.saveShape(@currentShape)
+
+
 class LC.LineTool extends LC.StrokeTool
 
   begin: (x, y, lc) ->
