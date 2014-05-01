@@ -37,6 +37,7 @@ class LC.ImageShape extends LC.Shape
   @fromJSON: (lc, data) ->
     img = new Image()
     img.src = data.imageSrc
+    img.onload = () -> lc.repaint()
     i = new LC.ImageShape(data.x, data.y, img, data.w, data.h)
 
 class LC.Rectangle extends LC.Shape
