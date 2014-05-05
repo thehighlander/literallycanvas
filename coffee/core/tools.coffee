@@ -45,7 +45,7 @@ class LC.StampTool extends LC.StrokeTool
       when "star"
         output = @starStamp
       else
-        output = null;
+        output = @checkmarkStamp
 
     return output
 

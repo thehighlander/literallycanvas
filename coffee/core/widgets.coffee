@@ -209,7 +209,7 @@ class LC.StampWidget extends LC.ToolWidget
   cssSuffix: "stamp"
   button: -> "<img src='#{@opts.imageURLPrefix}/stamp.png'>"
   options: ->
-    @$el = $("<div id='stampset'><div class='button' data-stamp='checkmark'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/checkmark.png' alt='Checkmark stamp'></div><div class='button' data-stamp='arrowleft'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/arrowleft.png' alt='Left arrow stamp'></div><div class='button' data-stamp='arrowright'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/arrowright.png' alt='Right arrow stamp'></div><div class='button' data-stamp='star'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/star.png' alt='Star stamp'></div></div>")
+    @$el = $("<div id='stampset'><div class='button active' data-stamp='checkmark'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/checkmark.png' alt='Checkmark stamp'></div><div class='button' data-stamp='arrowleft'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/arrowleft.png' alt='Left arrow stamp'></div><div class='button' data-stamp='arrowright'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/arrowright.png' alt='Right arrow stamp'></div><div class='button' data-stamp='star'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/star.png' alt='Star stamp'></div></div>")
 
     arrowLeftButton = @$el.find('[data-stamp=arrowleft]')
     arrowLeftButton.click (e) => @selectButton(arrowLeftButton)
