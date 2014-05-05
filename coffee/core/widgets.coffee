@@ -61,6 +61,30 @@ class LC.RectangleWidget extends LC.StrokeWidget
   makeTool: -> new LC.RectangleTool()
 
 
+class LC.EllipseWidget extends LC.StrokeWidget
+
+  title: 'Ellipse'
+  cssSuffix: 'ellipse'
+  button: -> "<img src='#{@opts.imageURLPrefix}/circle.png'>"
+  makeTool: -> new LC.EllipseTool()
+  options: ->
+    # use the base class so I can get the slider for stroke thickness.
+    @$el = LC.StrokeWidget.prototype.options.call(this)
+    @$el = @$el.add("<div id='ellipseOptions' style='display: inline;'><div class='button' data-root='corner'><img width='18' height='18' src='#{@opts.imageURLPrefix}/corner.png' alt='Draw ellipse from corner'></div><div class='button' data-root='center'><img width='18' height='18' src='#{@opts.imageURLPrefix}/center.png' alt='Draw ellipse from center.'></div></div>")
+    
+    cornerButton = @$el.find('[data-root=corner]')
+    cornerButton.click (e) => @selectButton(cornerButton)
+
+    centerButton = @$el.find('[data-root=center]')
+    centerButton.click (e) => @selectButton(centerButton)
+
+    @$el
+
+  selectButton: (t) ->
+    @$el.find("#ellipseOptions .active").removeClass("active")
+    t.addClass("active")
+    @tool.root = t.attr("data-root")
+
 class LC.HighlighterWidget extends LC.StrokeWidget
 
   title: 'Highlighter'
