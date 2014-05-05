@@ -65,12 +65,12 @@ class LC.EllipseWidget extends LC.StrokeWidget
 
   title: 'Ellipse'
   cssSuffix: 'ellipse'
-  button: -> "<img src='#{@opts.imageURLPrefix}/circle.png'>"
+  button: -> "<img src='#{@opts.imageURLPrefix}/ellipse.png'>"
   makeTool: -> new LC.EllipseTool()
   options: ->
     # use the base class so I can get the slider for stroke thickness.
     @$el = LC.StrokeWidget.prototype.options.call(this)
-    @$el = @$el.add("<div id='ellipseOptions' style='display: inline;'><div class='button' data-root='corner'><img width='18' height='18' src='#{@opts.imageURLPrefix}/corner.png' alt='Draw ellipse from corner'></div><div class='button' data-root='center'><img width='18' height='18' src='#{@opts.imageURLPrefix}/center.png' alt='Draw ellipse from center.'></div></div>")
+    @$el = @$el.add("<div id='ellipseOptions' style='display: inline;'><div class='button' data-root='corner'><img width='18' height='18' src='#{@opts.imageURLPrefix}/ellipse-corner.png' alt='Draw ellipse from corner'></div><div class='button' data-root='center'><img width='18' height='18' src='#{@opts.imageURLPrefix}/ellipse-center.png' alt='Draw ellipse from center.'></div></div>")
     
     cornerButton = @$el.find('[data-root=corner]')
     cornerButton.click (e) => @selectButton(cornerButton)
