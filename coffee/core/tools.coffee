@@ -30,6 +30,22 @@ class LC.RectangleTool extends LC.StrokeTool
     lc.saveShape(@currentShape)
 
 
+class LC.EllipseTool extends LC.StrokeTool
+  @root = "corner"
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Ellipse(
+      x, y, 0, 0, @strokeWidth, lc.getColor('primary'), lc.getColor('secondary'), @root)
+
+  continue: (x, y, lc) ->
+    @currentShape.width = x - @currentShape.x
+    @currentShape.height = y - @currentShape.y
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
+
+
 class LC.StampTool extends LC.StrokeTool
 
   getCurrentStamp: () ->
