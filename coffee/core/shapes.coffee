@@ -40,6 +40,7 @@ class LC.ImageShape extends LC.Shape
     img.onload = () -> lc.repaint()
     i = new LC.ImageShape(data.x, data.y, img, data.w, data.h)
 
+
 class LC.Rectangle extends LC.Shape
 
   className: 'Rectangle'
@@ -63,6 +64,71 @@ class LC.Rectangle extends LC.Shape
       data.x, data.y, data.strokeWidth, data.strokeColor, data.fillColor)
     shape.width = data.width
     shape.height = data.height
+    shape
+
+
+class LC.Ellipse extends LC.Shape
+
+  #todo: when HTML5 ellipse is better supported, switch to using that instead of calculating a "rough ellipse."
+  # as of this note (02 May 14), ellipse only exists in Chrome & Opera. No Firefox or IE(hahahahaha) and no FlashCanvas polyfill.
+  className: 'Ellipse'
+
+  constructor: (@x, @y, @width, @height, @strokeWidth, @strokeColor, @fillColor, @root='corner') ->
+  
+  draw: (ctx) ->
+    if @root=='center'
+      @drawFromCenter(ctx)
+    else
+      @drawFromCorner(ctx)
+
+  drawFromCenter: (ctx) ->
+    ctx.save() # save state
+    ctx.beginPath()
+    ctx.translate(@x-@width, @y-@height)
+    ctx.scale(@width, @height)
+    ctx.arc(1, 1, 1, 0, 2 * Math.PI, false)
+    ctx.restore() # restore to original state
+    ctx.save()
+    if @strokeColor 
+      ctx.strokeStyle = @strokeColor
+    if @fillColor 
+      ctx.fillStyle = @fillColor
+      ctx.fill()
+    ctx.lineWidth = @strokeWidth
+    ctx.stroke()
+    ctx.restore()
+
+  drawFromCorner: (ctx) ->
+    kappa = .5522848
+    ox = (@width / 2) * kappa   # control point offset horizontal
+    oy = (@height / 2) * kappa  # control point offset vertical
+    xe = @x + @width            # x-end
+    ye = @y + @height           # y-end
+    xm = @x + @width / 2        # x-middle
+    ym = @y + @height / 2       # y-middle
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(@x, ym);
+    ctx.bezierCurveTo(@x, ym - oy, xm - ox, @y, xm, @y);
+    ctx.bezierCurveTo(xm + ox, @y, xe, ym - oy, xe, ym);
+    ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+    ctx.bezierCurveTo(xm - ox, ye, @x, ym + oy, @x, ym);    
+    if @strokeColor 
+      ctx.strokeStyle = @strokeColor
+    if @fillColor 
+      ctx.fillStyle = @fillColor
+      ctx.fill()
+    ctx.lineWidth = @strokeWidth
+    ctx.stroke();
+    ctx.restore();
+
+  jsonContent: ->
+    {@x, @y, @width, @height, @strokeWidth, @strokeColor, @fillColor, @root}
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Ellipse(
+      data.x, data.y, data.width, data.height, data.strokeWidth, data.strokeColor, data.fillColor, data.root)
     shape
 
 
