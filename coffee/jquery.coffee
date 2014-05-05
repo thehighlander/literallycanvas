@@ -14,7 +14,7 @@ LC.init = (el, opts = {}) ->
   unless 'toolClasses' of opts
     opts.toolClasses = [
         LC.PencilWidget, LC.EraserWidget, LC.LineWidget, LC.HighlighterWidget, 
-        LC.RectangleWidget, LC.EllipseWidget, LC.TextWidget, LC.PanWidget, 
+        LC.RectangleWidget, LC.EllipseWidget, LC.TextWidget, 
         LC.EyeDropperWidget, LC.StampWidget, 
     ]
 
