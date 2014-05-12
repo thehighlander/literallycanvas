@@ -110,6 +110,12 @@ class LC.LiterallyCanvas
     @trigger('shapeSave', {shape: shape})
     @trigger('drawingChange', {shape: shape})
 
+  removeShape: (shape) ->
+    newShapes = []
+    newShapes.push(keeper) for keeper in @shapes when JSON.stringify(keeper.jsonContent()) isnt JSON.stringify(shape.jsonContent())
+    @execute(new LC.ClearAction(@, @shapes, newShapes))
+    @trigger('drawingChange', {shape: shape})
+
   numShapes: -> @shapes.length
 
   pan: (x, y) ->

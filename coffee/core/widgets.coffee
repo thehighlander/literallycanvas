@@ -255,3 +255,12 @@ class LC.StampWidget extends LC.ToolWidget
     @tool.currentStamp = t.data("stamp")
 
   makeTool: -> new LC.StampTool()
+
+
+class LC.PointerWidget extends LC.ToolWidget
+
+  title: "Pointer"
+  cssSuffix: "pointer"
+  button: -> "<img src='#{@opts.imageURLPrefix}/laserpointer_tiny.png'>"
+  makeTool: -> new LC.PointerTool()
+  

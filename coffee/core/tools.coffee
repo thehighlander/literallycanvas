@@ -116,6 +116,51 @@ class LC.StampTool extends LC.StrokeTool
     lc.saveShape(@currentShape)
 
 
+class LC.PointerTool extends LC.StrokeTool
+
+  getCurrentStamp: () ->
+    output = null
+
+    switch @currentStamp
+      when "laserpointer.png"
+        output = @laserpointer
+      else
+        output = @laserpointer
+
+    return output
+
+  preloadImages: () ->
+    @laserpointer = new Image()
+    @laserpointer.src = "/content/img/literally/stamps/laserpointer.png"
+
+  constructor: () -> 
+    @strokeWidth = 0
+    @currentStamp = null;
+    @preloadImages()
+
+  isSameShape: (shape, testShape) ->
+    isSame = false
+
+    if shape.jsonContent() == testShape.jsonContent()
+      isSame = true
+
+    isSame
+
+  begin: (x, y, lc) ->
+    @img = @getCurrentStamp()
+    # todo: set duration using slider on toolbar!
+    @duration = 5000
+
+    # todo: determine default size of Pointer. Can they change it?
+    @currentShape = new LC.FadingImageShape(x, y, @img, 64, 64, @duration)
+    lc.saveShape(@currentShape)
+    thePointer = @currentShape
+    window.setTimeout(
+      () -> 
+        lc.removeShape(thePointer)
+      , thePointer.durationMS);
+
+
 class LC.LineTool extends LC.StrokeTool
 
   begin: (x, y, lc) ->

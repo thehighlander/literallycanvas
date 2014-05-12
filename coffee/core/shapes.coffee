@@ -41,6 +41,45 @@ class LC.ImageShape extends LC.Shape
     i = new LC.ImageShape(data.x, data.y, img, data.w, data.h)
 
 
+class LC.FadingImageShape extends LC.Shape
+
+  className: 'FadingImageShape'
+
+  constructor: (@x, @y, @image, @w, @h, @durationMS) ->
+    # @hidden = false
+  draw: (ctx, retryCallback) ->
+    # if not @hidden
+    if @image
+      if (@w && @w > 0) && (@h && @h > 0)
+        ctx.drawImage(@image, @x, @y, @w, @h)
+      else
+        ctx.drawImage(@image, @x, @y)
+    else
+      @image.onload = retryCallback
+
+
+  jsonContent: ->
+    w = if @w then @w else 0
+    h = if @h then @h else 0
+    d = if @durationMS then @durationMS else 5000
+
+    {@x, @y, imageSrc: @image.src, w, h, d}
+  @fromJSON: (lc, data) ->
+    img = new Image()
+    img.src = data.imageSrc
+
+    thePointer = new LC.FadingImageShape(data.x, data.y, img, data.w, data.h, data.d)
+
+    img.onload = () -> 
+      lc.repaint()
+      window.setTimeout(
+        () -> 
+          lc.removeShape(thePointer)
+        , thePointer.durationMS);
+
+    thePointer    
+
+
 class LC.Rectangle extends LC.Shape
 
   className: 'Rectangle'

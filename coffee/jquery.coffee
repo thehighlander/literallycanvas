@@ -15,7 +15,7 @@ LC.init = (el, opts = {}) ->
     opts.toolClasses = [
         LC.PencilWidget, LC.EraserWidget, LC.LineWidget, LC.HighlighterWidget, 
         LC.RectangleWidget, LC.EllipseWidget, LC.TextWidget, 
-        LC.EyeDropperWidget, LC.StampWidget, 
+        LC.EyeDropperWidget, LC.StampWidget, LC.PointerWidget
     ]
 
   $el = $(el)
