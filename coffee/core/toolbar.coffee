@@ -5,8 +5,8 @@ LC.toolbarHTML = '
   <div class="toolbar-row">
     <div class="toolbar-row-left">
       <div class="tools button-group"></div>
-      &nbsp;&nbsp;&nbsp;&nbsp;Background:
-      <div class="color-square background-picker">&nbsp;</div>
+      &nbsp;&nbsp;&nbsp;&nbsp;<span class="bg-picker">Background:
+      <div class="color-square background-picker">&nbsp;</div></span>
     </div>
 
     <div class="toolbar-row-right">
