@@ -6,10 +6,13 @@ class LC.LiterallyCanvas
   constructor: (@canvas, @opts) ->
     LC.bindEvents(this, @canvas, @opts.keyboardShortcuts)
 
+    bgColor = @opts.backgroundColor or 'transparent';
+    if typeof bgColor == "string"
+      bgColor = bgColor.killRGBA()
     @colors =
       primary: @opts.primaryColor or '#000'
       secondary: @opts.secondaryColor or '#fff'
-      background: @opts.backgroundColor or 'transparent'
+      background: bgColor
     @canvas.style.backgroundColor = @colors.background
 
     @watermarkImage = @opts.watermarkImage
@@ -92,7 +95,11 @@ class LC.LiterallyCanvas
 
   setColor: (name, color) ->
     @colors[name] = color
-    @canvas.style.backgroundColor = @colors.background
+    if typeof @colors.background == "string"
+        @canvas.style.backgroundColor = @colors.background.killRGBA()
+    else
+        @canvas.style.backgroundColor = @colors.background
+
     @trigger "#{name}ColorChange", @colors[name]
     @repaint()
 
@@ -182,13 +189,14 @@ class LC.LiterallyCanvas
     fn()
     ctx.restore()
 
-  clear: ->
+  clear: (suppressChangeEvent=false) ->
     oldShapes = @shapes
     newShapes = []
     @execute(new LC.ClearAction(this, oldShapes, newShapes))
     @repaint()
     @trigger('clear', null)
-    @trigger('drawingChange', {})
+    if not suppressChangeEvent
+      @trigger('drawingChange', {})
 
   execute: (action) ->
     @undoStack.push(action)
