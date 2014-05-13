@@ -112,7 +112,7 @@ class LC.LiterallyCanvas
 
   removeShapes: (typeToRemove, repaint=false) ->
     newShapes = []
-    newShapes.push(keeper) for keeper in @shapes when not keeper instanceof typeToRemove
+    newShapes.push(keeper) for keeper in @shapes when not (keeper instanceof typeToRemove)
     @execute(new LC.ClearAction(@, @shapes, newShapes))
     # NOTE: this method exists only to support the pointer...
     # maybe i should make a pointer collection instead of using @shapes... If you
