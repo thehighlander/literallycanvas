@@ -122,19 +122,39 @@ class LC.PointerTool extends LC.StrokeTool
     output = null
 
     switch @currentStamp
-      when "laserpointer.png"
-        output = @laserpointer
+      when "redlaser"
+        output = @lp_red
+      when "greenlaser"
+        output = @lp_green
+      # when "handright"
+      #   output = @hand_rt
+      # when "handleft"
+      #   output = @hand_lt
+      # when "josh"
+      #   output = @josh
       else
-        output = @laserpointer
+        output = @lp_red
 
     return output
 
   preloadImages: () ->
-    @laserpointer = new Image()
-    @laserpointer.src = "/content/img/literally/stamps/laserpointer.png"
+    @lp_red = new Image()
+    @lp_red.src = "/content/img/literally/stamps/laserpointer_red.png"
+
+    @lp_green = new Image()
+    @lp_green.src = "/content/img/literally/stamps/laserpointer_green.png"
+
+    # @hand_rt = new Image()
+    # @hand_rt.src = "/content/img/literally/stamps/hand_pointer_right.png"
+
+    # @hand_lt = new Image()
+    # @hand_lt.src = "/content/img/literally/stamps/hand_pointer_left.png"
+
+    # @josh = new Image()
+    # @josh.src = "/content/img/literally/stamps/josh_pointer.png"
 
   constructor: () -> 
-    @strokeWidth = 0
+    @pointerSize = 64
     @currentStamp = null;
     @preloadImages()
 
@@ -147,19 +167,20 @@ class LC.PointerTool extends LC.StrokeTool
     isSame
 
   begin: (x, y, lc) ->
+    lc.removeShapes(LC.PointerImage)
+
     @img = @getCurrentStamp()
-    # todo: set duration using slider on toolbar!
-    @duration = 5000
 
-    # todo: determine default size of Pointer. Can they change it?
-    @currentShape = new LC.FadingImageShape(x, y, @img, 64, 64, @duration)
+    halfSize = @pointerSize / 2
+    aspectRatio = @img.width / @img.height
+    # newHeight = @pointerSize / aspectRatio
+    # halfHeight = newHeight / 2
+    # @currentShape = new LC.PointerImage(x-halfSize, y-halfHeight, @img, @pointerSize, newHeight)
+    newHeight = @pointerSize / aspectRatio
+    @currentShape = new LC.PointerImage(x-halfSize, y-halfSize, @img, @pointerSize, @pointerSize)
+    
     lc.saveShape(@currentShape)
-    thePointer = @currentShape
-    window.setTimeout(
-      () -> 
-        lc.removeShape(thePointer)
-      , thePointer.durationMS);
-
+    
 
 class LC.LineTool extends LC.StrokeTool
 

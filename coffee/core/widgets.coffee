@@ -262,5 +262,46 @@ class LC.PointerWidget extends LC.ToolWidget
   title: "Pointer"
   cssSuffix: "pointer"
   button: -> "<img src='#{@opts.imageURLPrefix}/laserpointer_tiny.png'>"
+  options: ->
+    # image size selector
+    @$el = $("<span class='brush-width-min'>16 px</span><input type='range' min='16' max='128' step='16' value='#{@tool.pointerSize}'><span class='brush-width-max'>128 px</span><span class='brush-width-val'>(64 px)</span>")
+    # pointer style
+    #@$el = $("<div id='pointerset'><div class='button active' data-stamp='redlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_red.png' alt='Red laser pointer'></div><div class='button' data-stamp='greenlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_green.png' alt='Green laser pointer'></div><div class='button' data-stamp='handright'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/hand_pointer_right_tb.png' alt='Hand pointing right'></div><div class='button' data-stamp='handleft'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/hand_pointer_left_tb.png' alt='Hand pointing left'></div><div class='button' data-stamp='josh'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/josh_pointer_tb.png' alt='Boosh!'></div></div>")
+    @$el = @$el.add("<span id='pointerset'><span class='button active' data-stamp='redlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_red.png' alt='Red laser pointer'></span><span class='button' data-stamp='greenlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_green.png' alt='Green laser pointer'></span></span>")
+
+    $input = @$el.filter('input')
+
+    if $input.size() == 0
+      $input = @$el.find('input')
+
+    $brushWidthVal = @$el.filter('.brush-width-val')
+    if $brushWidthVal.size() == 0
+      $brushWidthVal = @$el.find('.brush-width-val')
+
+    $input.change (e) =>
+      @tool.pointerSize = parseInt($(e.currentTarget).val(), 10)
+      $brushWidthVal.html("(#{@tool.pointerSize} px)")
+
+    redLaserButton = @$el.find('[data-stamp=redlaser]')
+    redLaserButton.click (e) => @selectButton(redLaserButton)
+
+    greenLaserButton = @$el.find('[data-stamp=greenlaser]')
+    greenLaserButton.click (e) => @selectButton(greenLaserButton)
+
+    # handLeftButton = @$el.find('[data-stamp=handleft]')
+    # handLeftButton.click (e) => @selectButton(handLeftButton)
+
+    # handRightButton = @$el.find('[data-stamp=handright]')
+    # handRightButton.click (e) => @selectButton(handRightButton)
+
+    # joshButton = @$el.find('[data-stamp=josh]')
+    # joshButton.click (e) => @selectButton(joshButton)
+
+    @$el
+
+  selectButton: (t) ->
+    @$el.find("#pointerset .active").removeClass("active")
+    t.addClass("active")
+    @tool.currentStamp = t.data("stamp")
+
   makeTool: -> new LC.PointerTool()
-  

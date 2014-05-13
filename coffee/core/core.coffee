@@ -8,7 +8,7 @@ class LC.LiterallyCanvas
 
     bgColor = @opts.backgroundColor or 'transparent';
     if typeof bgColor == "string"
-      bgColor = bgColor.killRGBA()
+      bgColor = if bgColor.killRGBA then bgColor.killRGBA() else bgColor
     @colors =
       primary: @opts.primaryColor or '#000'
       secondary: @opts.secondaryColor or '#fff'
@@ -95,7 +95,7 @@ class LC.LiterallyCanvas
 
   setColor: (name, color) ->
     @colors[name] = color
-    if typeof @colors.background == "string"
+    if typeof @colors.background == "string" and @colors.killRGBA
         @canvas.style.backgroundColor = @colors.background.killRGBA()
     else
         @canvas.style.backgroundColor = @colors.background
@@ -110,11 +110,15 @@ class LC.LiterallyCanvas
     @trigger('shapeSave', {shape: shape})
     @trigger('drawingChange', {shape: shape})
 
-  removeShape: (shape) ->
+  removeShapes: (typeToRemove, repaint=false) ->
     newShapes = []
-    newShapes.push(keeper) for keeper in @shapes when JSON.stringify(keeper.jsonContent()) isnt JSON.stringify(shape.jsonContent())
+    newShapes.push(keeper) for keeper in @shapes when not keeper instanceof typeToRemove
     @execute(new LC.ClearAction(@, @shapes, newShapes))
-    @trigger('drawingChange', {shape: shape})
+    # NOTE: this method exists only to support the pointer...
+    # maybe i should make a pointer collection instead of using @shapes... If you
+    # add repaint back in, it will make PointerTool behave erratically.
+    # if repaint
+    #   @trigger('drawingChange', {})
 
   numShapes: -> @shapes.length
 
