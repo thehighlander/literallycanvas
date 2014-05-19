@@ -41,17 +41,6 @@ class LC.ImageShape extends LC.Shape
     i = new LC.ImageShape(data.x, data.y, img, data.w, data.h)
 
 
-class LC.PointerImage extends LC.ImageShape
-
-  className: 'PointerImage'
-
-  @fromJSON: (lc, data) ->
-    img = new Image()
-    img.src = data.imageSrc
-    img.onload = () -> lc.repaint()
-    i = new LC.PointerImage(data.x, data.y, img, data.w, data.h)
-
-
 class LC.Rectangle extends LC.Shape
 
   className: 'Rectangle'
@@ -75,71 +64,6 @@ class LC.Rectangle extends LC.Shape
       data.x, data.y, data.strokeWidth, data.strokeColor, data.fillColor)
     shape.width = data.width
     shape.height = data.height
-    shape
-
-
-class LC.Ellipse extends LC.Shape
-
-  #todo: when HTML5 ellipse is better supported, switch to using that instead of calculating a "rough ellipse."
-  # as of this note (02 May 14), ellipse only exists in Chrome & Opera. No Firefox or IE(hahahahaha) and no FlashCanvas polyfill.
-  className: 'Ellipse'
-
-  constructor: (@x, @y, @width, @height, @strokeWidth, @strokeColor, @fillColor, @root='corner') ->
-  
-  draw: (ctx) ->
-    if @root=='center'
-      @drawFromCenter(ctx)
-    else
-      @drawFromCorner(ctx)
-
-  drawFromCenter: (ctx) ->
-    ctx.save() # save state
-    ctx.beginPath()
-    ctx.translate(@x-@width, @y-@height)
-    ctx.scale(@width, @height)
-    ctx.arc(1, 1, 1, 0, 2 * Math.PI, false)
-    ctx.restore() # restore to original state
-    ctx.save()
-    if @strokeColor 
-      ctx.strokeStyle = @strokeColor
-    if @fillColor 
-      ctx.fillStyle = @fillColor
-      ctx.fill()
-    ctx.lineWidth = @strokeWidth
-    ctx.stroke()
-    ctx.restore()
-
-  drawFromCorner: (ctx) ->
-    kappa = .5522848
-    ox = (@width / 2) * kappa   # control point offset horizontal
-    oy = (@height / 2) * kappa  # control point offset vertical
-    xe = @x + @width            # x-end
-    ye = @y + @height           # y-end
-    xm = @x + @width / 2        # x-middle
-    ym = @y + @height / 2       # y-middle
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(@x, ym);
-    ctx.bezierCurveTo(@x, ym - oy, xm - ox, @y, xm, @y);
-    ctx.bezierCurveTo(xm + ox, @y, xe, ym - oy, xe, ym);
-    ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
-    ctx.bezierCurveTo(xm - ox, ye, @x, ym + oy, @x, ym);    
-    if @strokeColor 
-      ctx.strokeStyle = @strokeColor
-    if @fillColor 
-      ctx.fillStyle = @fillColor
-      ctx.fill()
-    ctx.lineWidth = @strokeWidth
-    ctx.stroke();
-    ctx.restore();
-
-  jsonContent: ->
-    {@x, @y, @width, @height, @strokeWidth, @strokeColor, @fillColor, @root}
-
-  @fromJSON: (lc, data) ->
-    shape = new LC.Ellipse(
-      data.x, data.y, data.width, data.height, data.strokeWidth, data.strokeColor, data.fillColor, data.root)
     shape
 
 
@@ -311,3 +235,255 @@ class LC.TextShape extends LC.Shape
   jsonContent: -> {@x, @y, @text, @color, @font}
   @fromJSON: (lc, data) ->
     new LC.TextShape(data.x, data.y, data.text, data.color, data.font)
+
+
+class LC.Ellipse extends LC.Shape
+
+  #todo: when HTML5 ellipse is better supported, switch to using that instead of calculating a "rough ellipse."
+  # as of this note (02 May 14), ellipse only exists in Chrome & Opera. No Firefox or IE(hahahahaha) and no FlashCanvas polyfill.
+  className: 'Ellipse'
+
+  constructor: (@x, @y, @width, @height, @strokeWidth, @strokeColor, @fillColor, @root='corner') ->
+  
+  draw: (ctx) ->
+    if @root=='center'
+      @drawFromCenter(ctx)
+    else
+      @drawFromCorner(ctx)
+
+  drawFromCenter: (ctx) ->
+    ctx.save() # save state
+    ctx.beginPath()
+    ctx.translate(@x-@width, @y-@height)
+    ctx.scale(@width, @height)
+    ctx.arc(1, 1, 1, 0, 2 * Math.PI, false)
+    ctx.restore() # restore to original state
+    ctx.save()
+    if @strokeColor 
+      ctx.strokeStyle = @strokeColor
+    if @fillColor 
+      ctx.fillStyle = @fillColor
+      ctx.fill()
+    ctx.lineWidth = @strokeWidth
+    ctx.stroke()
+    ctx.restore()
+
+  drawFromCorner: (ctx) ->
+    kappa = .5522848
+    ox = (@width / 2) * kappa   # control point offset horizontal
+    oy = (@height / 2) * kappa  # control point offset vertical
+    xe = @x + @width            # x-end
+    ye = @y + @height           # y-end
+    xm = @x + @width / 2        # x-middle
+    ym = @y + @height / 2       # y-middle
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(@x, ym);
+    ctx.bezierCurveTo(@x, ym - oy, xm - ox, @y, xm, @y);
+    ctx.bezierCurveTo(xm + ox, @y, xe, ym - oy, xe, ym);
+    ctx.bezierCurveTo(xe, ym + oy, xm + ox, ye, xm, ye);
+    ctx.bezierCurveTo(xm - ox, ye, @x, ym + oy, @x, ym);    
+    if @strokeColor 
+      ctx.strokeStyle = @strokeColor
+    if @fillColor 
+      ctx.fillStyle = @fillColor
+      ctx.fill()
+    ctx.lineWidth = @strokeWidth
+    ctx.stroke();
+    ctx.restore();
+
+  jsonContent: ->
+    {@x, @y, @width, @height, @strokeWidth, @strokeColor, @fillColor, @root}
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Ellipse(
+      data.x, data.y, data.width, data.height, data.strokeWidth, data.strokeColor, data.fillColor, data.root)
+    shape
+
+
+class LC.Checkmark extends LC.Shape
+
+  className: 'Checkmark'
+
+  constructor: (@x, @y, @w, @h, @strokeWidth, @strokeColor) ->
+
+  draw: (ctx) ->
+    ctx.save() 
+    @drawCheck(ctx, {x:@x, y:@y, w:@w, h:@h})
+    ctx.restore() 
+
+  drawCheck: (ctx, rect) ->
+    checkStart = {
+        "x": rect.x,
+        "y": rect.y + (rect.h * (2/3))
+    }
+    checkPoint = {
+        "x": rect.x + (rect.w * (1/3)),
+        "y": rect.y + rect.h
+    }
+    checkEnd = {
+        "x": rect.x + rect.w,
+        "y": rect.y
+    }
+    
+    ctx.beginPath()
+    ctx.lineCap = 'square'
+    ctx.fillStyle = @fillColor
+    ctx.lineWidth = @strokeWidth
+    ctx.strokeStyle = @strokeColor
+    ctx.moveTo(checkStart.x, checkStart.y)
+    ctx.lineTo(checkPoint.x, checkPoint.y)
+    ctx.lineTo(checkEnd.x, checkEnd.y)
+    ctx.stroke()
+
+  jsonContent: ->
+     {@x, @y, @w, @h, @strokeWidth, @strokeColor}
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Checkmark(
+      data.x, data.y, data.w, data.h, data.strokeWidth, data.strokeColor)
+    shape
+
+
+class LC.Arrow extends LC.Shape
+  #todo: modify arrow to be "line-based" so it can be any angle instead of horizontally fixed.
+  # see: http://www.dbp-consulting.com/tutorials/canvas/CanvasArrow.html
+
+  className: 'Arrow'
+
+  constructor: (@x, @y, @w, @h, @strokeWidth, @strokeColor) ->
+
+  draw: (ctx) ->    
+    ctx.save() 
+    @drawArrow(ctx, {x:@x, y:@y, w:@w, h:@h})
+    ctx.restore() 
+
+  drawArrow: (ctx, rect) ->
+    arrowStart = {
+        "x": rect.x,
+        "y": rect.y + rect.h / 2
+    }
+    arrowPoint = {
+        "x": rect.x + rect.w,
+        "y": rect.y + rect.h / 2
+    }
+
+    # arbitrary 1/2 position for arrow tip
+    endCapX = rect.x + (1 / 2) * rect.w
+
+    ctx.lineWidth = @strokeWidth
+    ctx.strokeStyle = @strokeColor
+    ctx.lineCap = 'round'
+
+    # draw the arrow body    
+    ctx.beginPath()
+    ctx.moveTo(arrowStart.x, arrowStart.y)
+    ctx.lineTo(arrowPoint.x, arrowPoint.y)
+    ctx.stroke()
+
+    # draw head of arrow as a single line so the "tip" is drawn with a nice point.
+    ctx.beginPath()
+    ctx.lineCap = 'square'
+    ctx.moveTo(endCapX, rect.y)
+    ctx.lineTo(arrowPoint.x, arrowPoint.y)
+    ctx.lineTo(endCapX, rect.y + rect.h)
+    ctx.stroke()
+
+  jsonContent: ->
+     {@x, @y, @w, @h, @strokeWidth, @strokeColor}
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Arrow(
+      data.x, data.y, data.w, data.h, data.strokeWidth, data.strokeColor)
+    shape
+
+
+class LC.Star extends LC.Shape
+
+  className: 'Star'
+
+  constructor: (@x, @y, @w, @h, @strokeWidth, @strokeColor, @fillColor) ->
+
+  draw: (ctx) ->    
+    @drawSimpleStar(ctx, {x:@x, y:@y, w:@w, h:@h})
+
+  drawStar: (ctx, cx, cy, spikes, innerRad, outerRad) ->
+    rot=Math.PI/2*3
+    x=cx
+    y=cy
+    step=Math.PI/spikes
+   
+    ctx.save()
+    ctx.translate(cx, cy) # translate & rotate to make the point straight up.
+    ctx.rotate((Math.PI * 1 / spikes))
+    ctx.translate(-cx, -cy)
+    ctx.strokeStyle=@strokeColor
+    ctx.fillStyle=@fillColor
+    ctx.lineWidth=@strokeWidth
+    ctx.beginPath()
+
+    for num in [0..spikes]
+      x=cx+Math.cos(rot)*innerRad
+      y=cy+Math.sin(rot)*innerRad
+      ctx.lineTo(x,y)
+      rot+=step      
+      x=cx+Math.cos(rot)*outerRad
+      y=cy+Math.sin(rot)*outerRad
+      ctx.lineTo(x,y)
+      rot+=step
+
+    ctx.lineTo(cx, cy-innerRad)
+    ctx.stroke()
+    ctx.closePath()  
+    ctx.fill()
+    ctx.restore() 
+
+  drawSimpleStar: (ctx, rect) ->
+    center = {
+        x: rect.x + (rect.w / 2),
+        y: rect.y + (rect.h / 2)
+    }
+
+    points = 5
+    innerRad = rect.w / 5
+    outerRad = rect.w / 2
+
+    @drawStar(ctx, center.x, center.y, points, innerRad, outerRad)
+
+  jsonContent: ->
+     {@x, @y, @w, @h, @strokeWidth, @strokeColor, @fillColor}
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Star(
+      data.x, data.y, data.w, data.h, data.strokeWidth, data.strokeColor, data.fillColor)
+    shape
+
+
+class LC.Pointer extends LC.Shape
+
+  className: 'Pointer'
+
+  constructor: (@x, @y, @w, @h, @fillColor) ->
+
+  draw : (ctx) ->  
+    # ctx.save()
+    # gradient created at http://victorblog.com/html5-canvas-gradient-creator
+    grd = ctx.createRadialGradient(@x, @y, 0.000, @x, @y, @h/2)   
+    grd.addColorStop(0.289, @fillColor)
+    grd.addColorStop(1.000, 'rgba(255, 255, 255, 0.000)')
+    
+    ctx.beginPath()
+    ctx.arc(@x, @y, @h/2, 0, 2*Math.PI, false)    
+    ctx.fillStyle = grd
+    ctx.fill()
+    # ctx.restore() 
+
+  jsonContent: ->
+     {@x, @y, @w, @h, @strokeWidth, @fillColor}
+
+  @fromJSON: (lc, data) ->
+    shape = new LC.Pointer(
+      data.x, data.y, data.w, data.h, data.fillColor)
+    shape
+

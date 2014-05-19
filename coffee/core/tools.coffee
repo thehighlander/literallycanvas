@@ -14,6 +14,12 @@ class LC.StrokeTool extends LC.Tool
 
   constructor: -> @strokeWidth = 5
 
+  setStrokeWidth: (strokeWidth) ->
+    @strokeWidth = strokeWidth
+    @tool.strokeWidth = 15
+    this.$el.find("input[type=range]").val(@tool.strokeWidth)
+    this.$el.find(".brush-width-val").html("(" + @tool.strokeWidth + " px)")
+
 
 class LC.RectangleTool extends LC.StrokeTool
 
@@ -27,158 +33,6 @@ class LC.RectangleTool extends LC.StrokeTool
     lc.update(@currentShape)
 
   end: (x, y, lc) ->
-    lc.saveShape(@currentShape)
-
-
-class LC.EllipseTool extends LC.StrokeTool
-  @root = "corner"
-
-  begin: (x, y, lc) ->
-    @currentShape = new LC.Ellipse(
-      x, y, 0, 0, @strokeWidth, lc.getColor('primary'), lc.getColor('secondary'), @root)
-
-  continue: (x, y, lc) ->
-    @currentShape.width = x - @currentShape.x
-    @currentShape.height = y - @currentShape.y
-    lc.update(@currentShape)
-
-  end: (x, y, lc) ->
-    lc.saveShape(@currentShape)
-
-
-class LC.StampTool extends LC.StrokeTool
-
-  getCurrentStamp: () ->
-    output = null
-
-    switch @currentStamp
-      when "arrowleft"
-        output = @arrowLeftStamp
-      when "arrowright"
-        output = @arrowRightStamp
-      when "checkmark"
-        output = @checkmarkStamp
-      when "star"
-        output = @starStamp
-      else
-        output = @checkmarkStamp
-
-    return output
-
-  preloadImages: () ->
-    @arrowLeftStamp = new Image()
-    @arrowLeftStamp.src = "/content/img/literally/stamps/arrowleft.png"
-
-    @arrowRightStamp = new Image()
-    @arrowRightStamp.src = "/content/img/literally/stamps/arrowright.png"
-
-    @starStamp = new Image()
-    @starStamp.src = "/content/img/literally/stamps/star.png"
-
-    @checkmarkStamp = new Image()
-    @checkmarkStamp.src = "/content/img/literally/stamps/checkmark.png"
-
-  constructor: () -> 
-    @strokeWidth = 0
-    @currentStamp = null;
-    @preloadImages()
-
-  begin: (x, y, lc) ->
-    strokeColor = "rgba(255, 255, 255, 0.0)" # lc.getColor('primary')
-    fillColor = "rgba(1, 1, 1, 0.25)" # lc.getColor('secondary')
-
-    # use a rectangle to indicate the final size of the stamp (until i figure out how to resize stamp on the fly).
-    # also, give 'em the transparent rectangle as guide if no tool was selected.
-    @currentShape = new LC.Rectangle(x, y, @strokeWidth, strokeColor, fillColor)
-
-  continue: (x, y, lc) ->
-    @currentShape.width = x - @currentShape.x
-    @currentShape.height = y - @currentShape.y
-    
-    lc.update(@currentShape)
-
-  end: (x, y, lc) ->
-    #todo: use stroke & fill from primary/secondary to draw shape.
-    @img = @getCurrentStamp()
-
-    # #do some swaperooni on the x/y values. if you draw anything but top left to bottom right 
-    # of the rectangle, the ImageShape fails to draw correctly due to negative widths.
-    if @currentShape.width < 0
-      @currentShape.x = @currentShape.x + @currentShape.width
-      @currentShape.width = Math.abs(@currentShape.width)
-
-    if @currentShape.height < 0
-      @currentShape.y = @currentShape.y + @currentShape.height
-      @currentShape.height = Math.abs(@currentShape.height)
-
-    @currentShape = new LC.ImageShape(@currentShape.x, @currentShape.y, @img, @currentShape.width, @currentShape.height)
-
-    lc.saveShape(@currentShape)
-
-
-class LC.PointerTool extends LC.StrokeTool
-
-  getCurrentStamp: () ->
-    output = null
-
-    switch @currentStamp
-      when "redlaser"
-        output = @lp_red
-      when "greenlaser"
-        output = @lp_green
-      # when "handright"
-      #   output = @hand_rt
-      # when "handleft"
-      #   output = @hand_lt
-      # when "josh"
-      #   output = @josh
-      else
-        output = @lp_red
-
-    return output
-
-  preloadImages: () ->
-    @lp_red = new Image()
-    @lp_red.src = "/content/img/literally/stamps/laserpointer_red.png"
-
-    @lp_green = new Image()
-    @lp_green.src = "/content/img/literally/stamps/laserpointer_green.png"
-
-    # @hand_rt = new Image()
-    # @hand_rt.src = "/content/img/literally/stamps/hand_pointer_right.png"
-
-    # @hand_lt = new Image()
-    # @hand_lt.src = "/content/img/literally/stamps/hand_pointer_left.png"
-
-    # @josh = new Image()
-    # @josh.src = "/content/img/literally/stamps/josh_pointer.png"
-
-  constructor: () -> 
-    @pointerSize = 64
-    @currentStamp = null;
-    @preloadImages()
-
-  isSameShape: (shape, testShape) ->
-    isSame = false
-
-    if shape.jsonContent() == testShape.jsonContent()
-      isSame = true
-
-    isSame
-
-  begin: (x, y, lc) ->
-    lc.removeShapes(LC.PointerImage)
-
-    @img = @getCurrentStamp()
-
-    halfSize = @pointerSize / 2
-    aspectRatio = @img.width / @img.height
-    # newHeight = @pointerSize / aspectRatio
-    # halfHeight = newHeight / 2
-    # @currentShape = new LC.PointerImage(x-halfSize, y-halfHeight, @img, @pointerSize, newHeight)
-    newHeight = @pointerSize / aspectRatio
-    @currentShape = new LC.PointerImage(x-halfSize, y-halfSize, @img, @pointerSize, @pointerSize)
-    
     lc.saveShape(@currentShape)
     
 
@@ -264,6 +118,7 @@ class LC.EyeDropper extends LC.Tool
   continue: (x, y, lc) ->
     @readColor(x, y, lc)
 
+
 class LC.TextTool extends LC.Tool
 
   constructor: (@text = '', @font = 'bold 18px sans-serif') ->
@@ -283,3 +138,103 @@ class LC.TextTool extends LC.Tool
   end:(x, y, lc) ->
     lc.saveShape(@currentShape)
 
+
+class LC.EllipseTool extends LC.StrokeTool
+  @root = "corner"
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Ellipse(
+      x, y, 20, 20, @strokeWidth, lc.getColor('primary'), lc.getColor('secondary'), @root)
+
+  continue: (x, y, lc) ->
+    @currentShape.width = x - @currentShape.x
+    @currentShape.height = y - @currentShape.y
+
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
+
+
+class LC.HighlighterTool extends LC.StrokeTool
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Highlight(
+      x, y, x, y, @strokeWidth, 'rgba(255, 255, 0, 0.50)')
+
+  continue: (x, y, lc) ->
+    @currentShape.x2 = x
+    @currentShape.y2 = y
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
+
+
+class LC.CheckmarkTool extends LC.StrokeTool
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Checkmark(
+      x, y, 20, 30, @strokeWidth, lc.getColor('primary'))
+
+  continue: (x, y, lc) ->
+    newX = x - @currentShape.x
+    newY = y - @currentShape.y
+    @currentShape.w = @currentShape.w = if newX > 20 then newX else 20
+    @currentShape.h = @currentShape.h = if newY > 20 then newY else 20
+
+
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
+
+
+class LC.ArrowTool extends LC.StrokeTool
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Arrow(
+      x, y, 40, 30, @strokeWidth, lc.getColor('primary'))
+
+  continue: (x, y, lc) ->
+    @currentShape.w = x - @currentShape.x
+    @currentShape.h = y - @currentShape.y
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
+
+
+class LC.StarTool extends LC.StrokeTool
+
+  begin: (x, y, lc) ->
+    @currentShape = new LC.Star(
+      x, y, 30, 30, @strokeWidth, lc.getColor('primary'), lc.getColor('secondary'))
+
+  continue: (x, y, lc) -># the pointer is fixed to square dimensions per biz requirement
+    newSize = x - @currentShape.x
+    @currentShape.h = @currentShape.w = if newSize > 30 then newSize else 30
+
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)
+
+
+class LC.PointerTool extends LC.StrokeTool
+
+  begin: (x, y, lc) ->
+    lc.removeShapes(LC.Pointer)
+
+    @currentShape = new LC.Pointer(
+      x, y, 64, 64, lc.getColor('primary'))
+
+  continue: (x, y, lc) ->
+    # the pointer is fixed to square dimensions per biz requirement
+    newSize = x - @currentShape.x
+    # when width goes negative, all hell breaks loose. also, helps enforce a min. pointer size.
+    @currentShape.h = @currentShape.w = if newSize > 64 then newSize else 64
+    lc.update(@currentShape)
+
+  end: (x, y, lc) ->
+    lc.saveShape(@currentShape)

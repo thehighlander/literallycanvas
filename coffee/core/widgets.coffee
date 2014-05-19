@@ -52,6 +52,10 @@ class LC.StrokeWidget extends LC.ToolWidget
       $brushWidthVal.html("(#{@tool.strokeWidth} px)")
     return $el
 
+  setStrokeWidth: (sw) ->
+    @tool.strokeWidth = sw
+    this.$el.find("input[type=range]").val(sw)
+    this.$el.find(".brush-width-val").html("(" + sw+ " px)")
 
 class LC.RectangleWidget extends LC.StrokeWidget
 
@@ -59,49 +63,6 @@ class LC.RectangleWidget extends LC.StrokeWidget
   cssSuffix: 'rectangle'
   button: -> "<img src='#{@opts.imageURLPrefix}/rectangle.png'>"
   makeTool: -> new LC.RectangleTool()
-
-
-class LC.EllipseWidget extends LC.StrokeWidget
-
-  title: 'Ellipse'
-  cssSuffix: 'ellipse'
-  button: -> "<img src='#{@opts.imageURLPrefix}/ellipse.png'>"
-  makeTool: -> new LC.EllipseTool()
-  options: ->
-    # use the base class so I can get the slider for stroke thickness.
-    @$el = LC.StrokeWidget.prototype.options.call(this)
-    @$el = @$el.add("<div id='ellipseOptions' style='display: inline;'><div class='button' data-root='corner'><img width='18' height='18' src='#{@opts.imageURLPrefix}/ellipse-corner.png' alt='Draw ellipse from corner'></div><div class='button' data-root='center'><img width='18' height='18' src='#{@opts.imageURLPrefix}/ellipse-center.png' alt='Draw ellipse from center.'></div></div>")
-    
-    cornerButton = @$el.find('[data-root=corner]')
-    cornerButton.click (e) => @selectButton(cornerButton)
-
-    centerButton = @$el.find('[data-root=center]')
-    centerButton.click (e) => @selectButton(centerButton)
-
-    @$el
-
-  selectButton: (t) ->
-    @$el.find("#ellipseOptions .active").removeClass("active")
-    t.addClass("active")
-    @tool.root = t.attr("data-root")
-
-class LC.HighlighterWidget extends LC.StrokeWidget
-
-  title: 'Highlighter'
-  cssSuffix: 'highlighter'
-  button: -> "<img src='#{@opts.imageURLPrefix}/highlighter.png'>"
-  makeTool: -> new LC.HighlighterTool()
-  prepareTool: (lc) -> 
-    # tool.strokeWidth = 40;
-    # canvas.setColor("primary", "rgba(255, 255, 0, 0.50)");
-    # $(".tool-options-highlighter input[type=range]").val(40)
-    # $(".brush-width-val").html("(" +tool.strokeWidth + " px)");
-    @tool.strokeWidth = 40
-    lc.ctx.lineCap = "square"
-    #lc.setColor("primary", "rgba(255, 255, 0, 0.50)")
-    #lc.colors.primary = lc.getColor('primary')    
-    this.$el.find("input[type=range]").val(@tool.strokeWidth)
-    this.$el.find(".brush-width-val").html("(" + @tool.strokeWidth + " px)")
     
 
 class LC.LineWidget extends LC.StrokeWidget
@@ -227,81 +188,76 @@ class LC.TextWidget extends LC.ToolWidget
     @tool.text = @$el.find('input#text').val()
 
 
-class LC.StampWidget extends LC.ToolWidget
+class LC.EllipseWidget extends LC.StrokeWidget
 
-  title: "Stamp"
-  cssSuffix: "stamp"
-  button: -> "<img src='#{@opts.imageURLPrefix}/stamp.png'>"
+  title: 'Ellipse'
+  cssSuffix: 'ellipse'
+  button: -> "<img src='#{@opts.imageURLPrefix}/ellipse.png'>"
+  makeTool: -> new LC.EllipseTool()
   options: ->
-    @$el = $("<div id='stampset'><div class='button active' data-stamp='checkmark'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/checkmark.png' alt='Checkmark stamp'></div><div class='button' data-stamp='arrowleft'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/arrowleft.png' alt='Left arrow stamp'></div><div class='button' data-stamp='arrowright'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/arrowright.png' alt='Right arrow stamp'></div><div class='button' data-stamp='star'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/star.png' alt='Star stamp'></div></div>")
+    # use the base class so I can get the slider for stroke thickness.
+    @$el = LC.StrokeWidget.prototype.options.call(this)
+    @$el = @$el.add("<div id='ellipseOptions' style='display: inline;'><div class='button' data-root='corner'><img width='18' height='18' src='#{@opts.imageURLPrefix}/ellipse-corner.png' alt='Draw ellipse from corner'></div><div class='button' data-root='center'><img width='18' height='18' src='#{@opts.imageURLPrefix}/ellipse-center.png' alt='Draw ellipse from center.'></div></div>")
+    
+    cornerButton = @$el.find('[data-root=corner]')
+    cornerButton.click (e) => @selectButton(cornerButton)
 
-    arrowLeftButton = @$el.find('[data-stamp=arrowleft]')
-    arrowLeftButton.click (e) => @selectButton(arrowLeftButton)
+    centerButton = @$el.find('[data-root=center]')
+    centerButton.click (e) => @selectButton(centerButton)
 
-    arrowRightButton = @$el.find('[data-stamp=arrowright]')
-    arrowRightButton.click (e) => @selectButton(arrowRightButton)
-
-    checkmarkButton = @$el.find('[data-stamp=checkmark]')
-    checkmarkButton.click (e) => @selectButton(checkmarkButton)
-
-    starButton = @$el.find('[data-stamp=star]')
-    starButton.click (e) => @selectButton(starButton)
-
-    return @$el
+    @$el
 
   selectButton: (t) ->
-    @$el.find("#stampset .active").removeClass("active")
+    @$el.find("#ellipseOptions .active").removeClass("active")
     t.addClass("active")
-    @tool.currentStamp = t.data("stamp")
+    @tool.root = t.attr("data-root")
 
-  makeTool: -> new LC.StampTool()
+class LC.HighlighterWidget extends LC.StrokeWidget
+
+  title: 'Highlighter'
+  cssSuffix: 'highlighter'
+  button: -> "<img src='#{@opts.imageURLPrefix}/highlighter.png'>"
+  makeTool: -> new LC.HighlighterTool()
+  prepareTool: (lc) ->
+    lc.ctx.lineCap = "square"  
+    @setStrokeWidth(40)
+
+class LC.CheckmarkWidget extends LC.StrokeWidget
+
+  title: 'Checkmark'
+  cssSuffix: 'checkmark'
+  button: -> "<img src='#{@opts.imageURLPrefix}/checkmark.png'>"
+  makeTool: -> new LC.CheckmarkTool()
+  prepareTool: (lc) -> 
+    @setStrokeWidth(15)
+
+
+class LC.ArrowWidget extends LC.StrokeWidget
+
+  title: 'Arrow'
+  cssSuffix: 'arrow'
+  button: -> "<img src='#{@opts.imageURLPrefix}/arrowright.png'>"
+  makeTool: -> new LC.ArrowTool()
+  prepareTool: (lc) -> 
+    @setStrokeWidth(15)
+
+
+class LC.StarWidget extends LC.StrokeWidget
+
+  title: 'Star'
+  cssSuffix: 'star'
+  button: -> "<img src='#{@opts.imageURLPrefix}/star.png'>"
+  makeTool: -> new LC.StarTool()
+  prepareTool: (lc) -> 
+    @setStrokeWidth(15)
 
 
 class LC.PointerWidget extends LC.ToolWidget
 
   title: "Pointer"
   cssSuffix: "pointer"
-  button: -> "<img src='#{@opts.imageURLPrefix}/laserpointer_tiny.png'>"
-  options: ->
-    # image size selector
-    @$el = $("<span class='brush-width-min'>16 px</span><input type='range' min='16' max='128' step='16' value='#{@tool.pointerSize}'><span class='brush-width-max'>128 px</span><span class='brush-width-val'>(64 px)</span>")
-    # pointer style
-    #@$el = $("<div id='pointerset'><div class='button active' data-stamp='redlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_red.png' alt='Red laser pointer'></div><div class='button' data-stamp='greenlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_green.png' alt='Green laser pointer'></div><div class='button' data-stamp='handright'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/hand_pointer_right_tb.png' alt='Hand pointing right'></div><div class='button' data-stamp='handleft'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/hand_pointer_left_tb.png' alt='Hand pointing left'></div><div class='button' data-stamp='josh'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/josh_pointer_tb.png' alt='Boosh!'></div></div>")
-    @$el = @$el.add("<span id='pointerset'><span class='button active' data-stamp='redlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_red.png' alt='Red laser pointer'></span><span class='button' data-stamp='greenlaser'><img width='18' height='18' src='#{@opts.imageURLPrefix}/stamps/laserpointer_green.png' alt='Green laser pointer'></span></span>")
-
-    $input = @$el.filter('input')
-
-    if $input.size() == 0
-      $input = @$el.find('input')
-
-    $brushWidthVal = @$el.filter('.brush-width-val')
-    if $brushWidthVal.size() == 0
-      $brushWidthVal = @$el.find('.brush-width-val')
-
-    $input.change (e) =>
-      @tool.pointerSize = parseInt($(e.currentTarget).val(), 10)
-      $brushWidthVal.html("(#{@tool.pointerSize} px)")
-
-    redLaserButton = @$el.find('[data-stamp=redlaser]')
-    redLaserButton.click (e) => @selectButton(redLaserButton)
-
-    greenLaserButton = @$el.find('[data-stamp=greenlaser]')
-    greenLaserButton.click (e) => @selectButton(greenLaserButton)
-
-    # handLeftButton = @$el.find('[data-stamp=handleft]')
-    # handLeftButton.click (e) => @selectButton(handLeftButton)
-
-    # handRightButton = @$el.find('[data-stamp=handright]')
-    # handRightButton.click (e) => @selectButton(handRightButton)
-
-    # joshButton = @$el.find('[data-stamp=josh]')
-    # joshButton.click (e) => @selectButton(joshButton)
-
-    @$el
-
-  selectButton: (t) ->
-    @$el.find("#pointerset .active").removeClass("active")
-    t.addClass("active")
-    @tool.currentStamp = t.data("stamp")
-
+  button: -> "<img src='#{@opts.imageURLPrefix}/laserpointer_red.png'>"
   makeTool: -> new LC.PointerTool()
+  prepareTool: (lc) -> 
+    # default to a red laser pointer.
+    lc.setColor("primary", 'rgba(255, 0, 0, 1.000)')

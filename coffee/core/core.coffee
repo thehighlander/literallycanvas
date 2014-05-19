@@ -7,8 +7,11 @@ class LC.LiterallyCanvas
     LC.bindEvents(this, @canvas, @opts.keyboardShortcuts)
 
     bgColor = @opts.backgroundColor or 'transparent';
-    if typeof bgColor == "string"
-      bgColor = if bgColor.killRGBA then bgColor.killRGBA() else bgColor
+    # if typeof bgColor == "string"
+    #   bgColor = if bgColor.killRGBA then bgColor.killRGBA() else bgColor
+
+    bgColor = 'rgb(255, 255, 255)'
+
     @colors =
       primary: @opts.primaryColor or '#000'
       secondary: @opts.secondaryColor or '#fff'
@@ -19,13 +22,13 @@ class LC.LiterallyCanvas
     if @watermarkImage and not @watermarkImage.complete
       @watermarkImage.onload = => @repaint(true, false)
 
-    # chris - this line is replaced as a hack to get LC working with FlashCanvas
-    # @buffer = document.createElement('canvas')
-    @buffer = document.getElementById('literally_swap')
-    FlashCanvas.initElement(this.buffer) if FlashCanvas?
+    @singleBufferModeOn = @opts.singleBufferModeOn
+
+    if not @singleBufferModeOn
+      @buffer = document.createElement('canvas')
+      @bufferCtx = @buffer.getContext('2d')
 
     @ctx = @canvas.getContext('2d')
-    @bufferCtx = @buffer.getContext('2d')
 
     @backgroundShapes = []
     @shapes = []
@@ -95,10 +98,11 @@ class LC.LiterallyCanvas
 
   setColor: (name, color) ->
     @colors[name] = color
-    if typeof @colors.background == "string" and @colors.killRGBA
-        @canvas.style.backgroundColor = @colors.background.killRGBA()
-    else
-        @canvas.style.backgroundColor = @colors.background
+    # if typeof @colors.background == "string" and @colors.killRGBA
+    #     @canvas.style.backgroundColor = @colors.background.killRGBA()
+    # else
+    #     @canvas.style.backgroundColor = @colors.background
+    @canvas.style.backgroundColor = 'rgb(255, 255, 255)'
 
     @trigger "#{name}ColorChange", @colors[name]
     @repaint()
@@ -150,24 +154,34 @@ class LC.LiterallyCanvas
   # color, otherwise it is left transparent.
   repaint: (dirty = true, drawBackground = false) ->
     retryCallback = => @repaint(true)
-    if dirty
-      @buffer.width = @canvas.width
-      @buffer.height = @canvas.height
-      @bufferCtx.clearRect(0, 0, @buffer.width, @buffer.height)
-      if drawBackground
-        @bufferCtx.fillStyle = @colors.background
-        @bufferCtx.fillRect(0, 0, @buffer.width, @buffer.height)
-      if @watermarkImage
-        @bufferCtx.drawImage(
-          @watermarkImage,
-          @canvas.width / 2 - @watermarkImage.width / 2,
-          @canvas.height / 2 - @watermarkImage.height / 2,
-        )
-      @draw(@backgroundShapes, @bufferCtx, retryCallback)
-      @draw(@shapes, @bufferCtx, retryCallback)
-    @ctx.clearRect(0, 0, @canvas.width, @canvas.height)
-    if @canvas.width > 0 and @canvas.height > 0
-      @ctx.drawImage @buffer, 0, 0
+    
+    if not @singleBufferModeOn
+      if dirty
+        # use double buffering to render offscreen and swap
+        @buffer.width = @canvas.width
+        @buffer.height = @canvas.height
+        @bufferCtx.clearRect(0, 0, @buffer.width, @buffer.height)
+        if drawBackground
+          @bufferCtx.fillStyle = @colors.background
+          @bufferCtx.fillRect(0, 0, @buffer.width, @buffer.height)
+        if @watermarkImage
+          @bufferCtx.drawImage(
+            @watermarkImage,
+            @canvas.width / 2 - @watermarkImage.width / 2,
+            @canvas.height / 2 - @watermarkImage.height / 2,
+          )
+        @draw(@backgroundShapes, @bufferCtx, retryCallback)
+        @draw(@shapes, @bufferCtx, retryCallback)
+      @ctx.clearRect(0, 0, @canvas.width, @canvas.height)      
+      if @canvas.width > 0 and @canvas.height > 0
+        @ctx.drawImage @buffer, 0, 0
+    else
+      # render directly to canvas element. will result in artifacts while drawing, but
+      # improves performance dramatically for consuming drawings in IE8.
+      @ctx.clearRect(0, 0, @canvas.width, @canvas.height)
+      @draw(@backgroundShapes, @ctx, retryCallback)
+      @draw(@shapes, @ctx, retryCallback)
+
     @trigger('repaint', null)
 
   # Redraws the back buffer to the screen in its current state

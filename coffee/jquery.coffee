@@ -11,11 +11,13 @@ LC.init = (el, opts = {}) ->
   opts.sizeToContainer ?= true
   opts.backgroundShapes ?= []
   opts.watermarkImage ?= null
+  opts.singleBufferModeOn ?= false
   unless 'toolClasses' of opts
     opts.toolClasses = [
         LC.PencilWidget, LC.EraserWidget, LC.LineWidget, LC.HighlighterWidget, 
         LC.RectangleWidget, LC.EllipseWidget, LC.TextWidget, 
-        LC.EyeDropperWidget, LC.StampWidget, LC.PointerWidget
+        LC.EyeDropperWidget, LC.PointerWidget,
+        LC.CheckmarkWidget, LC.ArrowWidget, LC.StarWidget
     ]
 
   $el = $(el)
@@ -27,7 +29,7 @@ LC.init = (el, opts = {}) ->
   unless $el.find('canvas').length
     $el.append('<canvas>')
 
-  FlashCanvas.initElement($el.find('canvas').get(0)) if FlashCanvas?
+  # FlashCanvas.initElement($el.find('canvas').get(0)) if FlashCanvas?
       
   lc = new LC.LiterallyCanvas($el.find('canvas').get(0), opts)
   tb = new LC.Toolbar(lc, $tbEl, opts)
