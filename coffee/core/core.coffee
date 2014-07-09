@@ -23,6 +23,7 @@ class LC.LiterallyCanvas
       @watermarkImage.onload = => @repaint(true, false)
 
     @singleBufferModeOn = @opts.singleBufferModeOn
+    @viewMode = if @opts.viewMode then @opts.viewMode else "presenter"
 
     if not @singleBufferModeOn
       @buffer = document.createElement('canvas')
@@ -59,7 +60,27 @@ class LC.LiterallyCanvas
     @repaint()
 
   trigger: (name, data) ->
-    @canvas.dispatchEvent(new CustomEvent(name, detail: data))
+    details = detail: data
+    myEvent = null
+
+    try
+      myEvent = new CustomEvent(name, details)
+    catch err
+      myEvent = null
+      KAPx.console.warn(err.message)
+      KAPx.console.warn("unable to create CustomEvent")
+
+    if not myEvent
+      try
+        myEvent = document.createEvent("CustomEvent")
+        myEvent.initCustomEvent(name, false, false, details)
+        KAPx.console.warn("CustomEvent created IE9+ style")
+      catch err
+        myEvent = null
+        KAPx.console.error(err.message)
+        KAPx.console.error("unable to create CustomEvent IE9+ style.")
+    
+    @canvas.dispatchEvent(myEvent)
 
   on: (name, fn) ->
     @canvas.addEventListener name, (e) ->
@@ -78,23 +99,27 @@ class LC.LiterallyCanvas
     @trigger('toolChange', {tool})
 
   begin: (x, y) ->
-    newPos = @clientCoordsToDrawingCoords(x, y)
-    @tool.begin newPos.x, newPos.y, this
-    @isDragging = true
-    @trigger("drawStart", {tool: @tool})
+    if @viewMode != "viewOnly"
+      newPos = @clientCoordsToDrawingCoords(x, y)
+      if @tool
+        @tool.begin newPos.x, newPos.y, this
+        @isDragging = true
+        @trigger("drawStart", {tool: @tool})
 
   continue: (x, y) ->
-    newPos = @clientCoordsToDrawingCoords(x, y)
-    if @isDragging
-      @tool.continue newPos.x, newPos.y, this
-      @trigger("drawContinue", {tool: @tool})
+    if @viewMode != "viewOnly"
+      newPos = @clientCoordsToDrawingCoords(x, y)
+      if @isDragging && @tool
+        @tool.continue newPos.x, newPos.y, this
+        @trigger("drawContinue", {tool: @tool})
 
   end: (x, y) ->
-    newPos = @clientCoordsToDrawingCoords(x, y)
-    if @isDragging
-      @tool.end newPos.x, newPos.y, this
-      @isDragging = false
-      @trigger("drawEnd", {tool: @tool})
+    if @viewMode != "viewOnly"
+      newPos = @clientCoordsToDrawingCoords(x, y)
+      if @isDragging && @tool
+        @tool.end newPos.x, newPos.y, this
+        @isDragging = false
+        @trigger("drawEnd", {tool: @tool})
 
   setColor: (name, color) ->
     @colors[name] = color
