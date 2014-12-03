@@ -69,17 +69,23 @@ class LC.HighlighterTool extends LC.StrokeTool
 class LC.Pencil extends LC.StrokeTool
 
   begin: (x, y, lc) ->
+    @lastPointAdded = Date.now()
     @color = lc.getColor('primary')
     @currentShape = @makeShape()
     @currentShape.addPoint(@makePoint(x, y, lc))
 
   continue: (x, y, lc) ->
-    @currentShape.addPoint(@makePoint(x, y, lc))
+    # rate limit the Pencil tool to reduce bandwidth consumed
+    if (Date.now() - @lastPointAdded) > 100
+      @currentShape.addPoint(@makePoint(x, y, lc))
+      @lastPointAdded = Date.now()
+
     lc.update(@currentShape)
 
   end: (x, y, lc) ->
     lc.saveShape(@currentShape)
     @currentShape = undefined
+    @lastPointAdded = undefined
 
   makePoint: (x, y, lc) -> new LC.Point(x, y, @strokeWidth, @color)
   makeShape: -> new LC.LinePathShape(this)
