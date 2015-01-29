@@ -76,7 +76,7 @@ class LC.Pencil extends LC.StrokeTool
 
   continue: (x, y, lc) ->
     # rate limit the Pencil tool to reduce bandwidth consumed
-    if (Date.now() - @lastPointAdded) > 100
+    if (Date.now() - @lastPointAdded) > 30
       @currentShape.addPoint(@makePoint(x, y, lc))
       @lastPointAdded = Date.now()
 
