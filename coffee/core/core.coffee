@@ -23,6 +23,7 @@ class LC.LiterallyCanvas
       @watermarkImage.onload = => @repaint(true, false)
 
     @singleBufferModeOn = @opts.singleBufferModeOn
+    @historyOn = @opts.historyOn
     @viewMode = if @opts.viewMode then @opts.viewMode else "presenter"
 
     if not @singleBufferModeOn
@@ -33,6 +34,7 @@ class LC.LiterallyCanvas
 
     @backgroundShapes = []
     @shapes = []
+
     @undoStack = []
     @redoStack = []
 
@@ -248,7 +250,8 @@ class LC.LiterallyCanvas
       @trigger('drawingChange', {})
 
   execute: (action) ->
-    @undoStack.push(action)
+    if @historyOn
+      @undoStack.push(new LC.AddShapeAction(action.lc, action.shape))
     action.do()
     @redoStack = []
 
@@ -263,7 +266,8 @@ class LC.LiterallyCanvas
   redo: ->
     return unless @redoStack.length
     action = @redoStack.pop()
-    @undoStack.push(action)
+    if @historyOn
+      @undoStack.push(action)
     action.do()
     @trigger('redo', {action})
     @trigger('drawingChange', {})
@@ -296,13 +300,18 @@ class LC.LiterallyCanvas
     for k in ['primary', 'secondary', 'background']
       @setColor(k, snapshot.colors[k])
 
+    shapeAction = new LC.AddShapeAction(this, null)
+
     @shapes = []
     for shapeRepr in snapshot.shapes
       if shapeRepr.className of LC
         shape = LC[shapeRepr.className].fromJSON(this, shapeRepr.data)
         if shape
-          @execute(new LC.AddShapeAction(this, shape))
+          shapeAction.set(this, shape)
+          @execute(shapeAction)
     @repaint(true)
+    if not @historyOn
+      @shapes = []
 
   loadSnapshotJSON: (str) ->
     @loadSnapshot(JSON.parse(str))
@@ -326,6 +335,8 @@ class LC.ClearAction
 class LC.AddShapeAction
 
   constructor: (@lc, @shape) ->
+
+  set: (@lc, @shape) ->
 
   do: ->
     @ix = @lc.shapes.length
